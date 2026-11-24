@@ -1,0 +1,69 @@
+// app/build.gradle — настройки приложения «Финансовый поток».
+//
+// applicationId — идентификатор в Google Play, после публикации его не поменять.
+// Тулчейн (compileSdk 36, minSdk 24, target 36, AGP 8.9.1, Gradle 8.11.1) — как в Планере.
+//
+// ПОДПИСЬ:
+//   - тестовый APK подписывается ключом app/test.jks (пароли открытые, лежит в репо).
+//     Подпись одна и та же от сборки к сборке — новый APK ставится поверх старого,
+//     данные не теряются. В Google Play этот ключ НИКОГДА не идёт.
+//   - боевой AAB для Play подписывается ключом из секретов GitHub (KEYSTORE_BASE64,
+//     KEY_ALIAS, KEY_PASSWORD, STORE_PASSWORD). Пока секретов нет — workflow этот шаг пропускает.
+//
+// История версий:
+//   - versionCode=1, versionName="0.1" — этап 1: потоки, работы, расходы, анализ, резервная копия.
+apply plugin: 'com.android.application'
+
+android {
+    namespace "com.financialflow.app"
+    // BuildConfig.PAGES_PATH (в AGP 8 BuildConfig по умолчанию выключен)
+    buildFeatures { buildConfig true }
+    compileSdkVersion 36
+    defaultConfig {
+        applicationId "com.financialflow.app"
+        resValue "string", "app_name", "Финансовый поток"
+        buildConfigField "String", "PAGES_PATH", '"/financial-flow/"'
+        minSdkVersion 24
+        targetSdkVersion 36
+        versionCode 1
+        versionName "0.1"
+    }
+    signingConfigs {
+        test {
+            storeFile file("test.jks")
+            storePassword "fflowtest"
+            keyAlias "fflowtest"
+            keyPassword "fflowtest"
+        }
+        release {
+            storeFile file(System.getenv("KEYSTORE_PATH") ?: "release.jks")
+            storePassword System.getenv("STORE_PASSWORD")
+            keyAlias System.getenv("KEY_ALIAS")
+            keyPassword System.getenv("KEY_PASSWORD")
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            // есть боевой ключ (секреты заданы) — подписываем им, иначе тестовым
+            signingConfig System.getenv("KEYSTORE_PATH") ? signingConfigs.release : signingConfigs.test
+        }
+        debug { minifyEnabled false }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+configurations {
+    all {
+        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
+        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+    }
+}
+
+dependencies {
+    // ViewCompat/WindowInsetsCompat (клавиатура при edge-to-edge) и FileProvider (шаринг копии)
+    implementation 'androidx.core:core:1.10.1'
+}

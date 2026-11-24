@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Версия задаётся ТОЛЬКО в app/build.gradle (defaultConfig). -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- INTERNET — интерфейс грузится с GitHub Pages, без сети — офлайн-копия из assets. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Запись копии в «Загрузки» на Android 9 и ниже. На 10+ — MediaStore без разрешения. -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+    <!-- SMS и уведомления банков — этап 3, здесь их пока нет. -->
+    <!-- enableOnBackInvokedCallback="false" — старое поведение «назад» (onBackPressed),
+         как в Планере. -->
+    <application
+        android:enableOnBackInvokedCallback="false"
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:theme="@android:style/Theme.DeviceDefault.Light.NoActionBar"
+        android:hardwareAccelerated="true"
+        android:allowBackup="true"
+        android:usesCleartextTraffic="false">
+        <!-- singleTask: файл копии из «Поделиться» приходит в onNewIntent того же окна,
+             а не в новый экземпляр со своим WebView. -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:configChanges="orientation|screenSize|keyboardHidden|navigation"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!-- «Поделиться» файлом копии в приложение (Telegram, Диск, Файлы). -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/json" />
+                <data android:mimeType="application/octet-stream" />
+            </intent-filter>
+            <!-- Открытие файла копии тапом в файловом менеджере. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" android:mimeType="application/json" />
+                <data android:scheme="file" android:mimeType="application/json" />
+            </intent-filter>
+        </activity>
+        <!-- FileProvider — «Поделиться» файлом копии на Android 7+.
+             authorities совпадает с getPackageName() + ".fileprovider" в MainActivity. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+    </application>
+</manifest>

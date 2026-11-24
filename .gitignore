@@ -1,0 +1,20 @@
+# Секреты — НИКОГДА не коммитить боевой keystore и пароли
+*.jks
+*.keystore
+# исключение: тестовый ключ с открытыми паролями, только для тестового APK (не для Play)
+!app/test.jks
+google-services.json
+local.properties
+
+# Сборка
+.gradle/
+build/
+app/build/
+*.apk
+*.aab
+app/src/main/assets/index.html
+
+# IDE
+.idea/
+*.iml
+.DS_Store

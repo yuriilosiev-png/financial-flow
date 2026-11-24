@@ -1,0 +1,22 @@
+// КОРНЕВОЙ build.gradle (в корне репозитория financial-flow, рядом с settings.gradle).
+// Задаёт версию Android Gradle Plugin и репозитории для всех модулей.
+// НЕ путать с app/build.gradle — там настройки самого приложения.
+//
+// Тулчейн как в Планере: AGP 8.9.1 (минимум для compileSdk 36), Gradle 8.11.1, JDK 17.
+// Firebase-плагин пока не подключаем — облако появится на этапе 4.
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.9.1'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}

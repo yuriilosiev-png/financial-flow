@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#dfe2e8">
+<title>Финансовый поток</title>
+<link rel="icon" type="image/png" href="icon-192.png">
+<style>
+:root{
+  --bg:#dfe2e8; --surface:#b3d7dc; --surface2:#aed5da; --line:#a9d2d8;
+  --txt:#10131a; --muted:rgba(16,19,26,.72);
+  --acc:#1f5fd0; --acc-soft:#dbe7ff; --pos:#0f6b3c; --neg:#a8221a; --warn:#c25e12;
+  --r:14px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--bg);background-attachment:fixed;color:var(--txt);
+  font-family:Roboto,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.4;
+  display:flex;flex-direction:column;height:100dvh;overflow:hidden;
+  padding-top:env(safe-area-inset-top);
+  -webkit-font-smoothing:antialiased;
+}
+button{font:inherit;color:inherit;border:none;background:none;cursor:pointer}
+input,select,textarea{font:inherit;font-size:16px;color:var(--txt)}
+.head{padding:14px 16px 10px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--line);flex-shrink:0}
+.head h1{flex:1;min-width:0;font-size:clamp(18px,5.4vw,22px);font-weight:800;letter-spacing:-.3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hback{font-size:30px;line-height:1;color:var(--acc);font-weight:700;padding:0 8px 0 0}
+.hright{font-size:14px;color:var(--muted);font-weight:600;white-space:nowrap}
+.hbtn{background:var(--acc);color:#fff;font-size:14px;font-weight:700;border-radius:999px;padding:7px 14px}
+.hbtn.ghost{background:var(--surface2);color:var(--txt);border:1px solid var(--line)}
+#scr{flex:1;overflow-y:auto;padding:12px 14px 96px;-webkit-overflow-scrolling:touch}
+#scr.with-bar{padding-bottom:190px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:13px 14px;margin-bottom:10px}
+.sec{margin:14px 2px 6px;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+.muted{color:var(--muted)}
+.small{font-size:12.5px}
+.pos{color:var(--pos)}.neg{color:var(--neg)}.warn{color:var(--warn)}
+.big{font-size:34px;font-weight:800;letter-spacing:-.5px}
+.row{display:flex;align-items:center;gap:10px}
+.grow{flex:1;min-width:0}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:10px}
+.stat .l{font-size:11.5px;color:var(--muted);font-weight:600}
+.stat .v{font-size:16px;font-weight:800}
+.tile{background:var(--surface2);border-radius:10px;padding:8px 10px}
+.tile .l{font-size:12px;color:var(--muted);font-weight:600}
+.tile .v{font-size:19px;font-weight:800}
+.seg{display:flex;gap:4px;padding:4px;background:var(--surface2);border:1px solid var(--line);border-radius:999px;margin-bottom:10px}
+.seg button{flex:1;border-radius:999px;padding:8px 4px;font-size:13.5px;font-weight:700}
+.seg button.on{background:var(--acc);color:#fff}
+.pnav{display:flex;align-items:center;justify-content:space-between;margin:-2px 2px 10px}
+.pnav button{font-size:22px;font-weight:700;color:var(--acc);width:44px;height:36px}
+.pnav span{font-weight:700;font-size:14.5px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 12px;font-size:14px;font-weight:700}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+.li{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.li:last-child{border-bottom:none}
+.li .t{font-weight:700;font-size:15.5px}
+.li .s{font-size:12.5px;color:var(--muted);font-weight:500}
+.li .r{text-align:right;font-weight:800;white-space:nowrap}
+.li .r .s{font-weight:600}
+.bar{height:7px;background:var(--surface2);border-radius:4px;margin-top:5px;overflow:hidden}
+.bar i{display:block;height:7px;border-radius:4px}
+.tag{font-size:11px;font-weight:800;color:#fff;border-radius:6px;padding:2px 7px;white-space:nowrap}
+.tag.soft{background:var(--surface2);color:var(--txt);font-weight:700}
+.btn{display:block;width:100%;text-align:center;background:var(--acc);color:#fff;font-weight:800;font-size:15.5px;border-radius:12px;padding:12px}
+.btn.ghost{background:var(--surface2);color:var(--txt);border:1px solid var(--line)}
+.btn.danger{background:var(--neg)}
+.btns{display:flex;gap:8px;margin-top:10px}
+.btns .btn{flex:1}
+.link{color:var(--acc);font-weight:700}
+.empty{text-align:center;padding:26px 10px;color:var(--muted);font-weight:600}
+.cnt{display:flex;align-items:center;gap:6px}
+.cnt button{width:44px;height:44px;border-radius:50%;font-size:24px;font-weight:700;line-height:1}
+.cnt .m{background:var(--surface2);border:1px solid var(--line)}
+.cnt .p{background:var(--acc);color:#fff}
+.cnt b{min-width:26px;text-align:center;font-size:19px}
+.search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:0 12px;margin-bottom:8px}
+.search input{flex:1;border:none;background:transparent;padding:10px 0;outline:none}
+.datebar{display:flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--line);border-radius:999px;padding:2px 4px}
+.datebar button{font-size:18px;font-weight:700;color:var(--acc);width:30px;height:30px}
+.datebar span{font-size:13.5px;font-weight:700;white-space:nowrap}
+.sumbar{position:fixed;left:0;right:0;bottom:0;background:var(--surface2);border-top:1px solid var(--line);border-radius:18px 18px 0 0;
+  padding:12px 16px calc(14px + env(safe-area-inset-bottom));box-shadow:0 -6px 18px rgba(0,0,0,.12);z-index:60}
+.nav{position:fixed;bottom:0;left:0;right:0;height:calc(64px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);
+  background:var(--surface);border-top:1px solid var(--line);display:flex;z-index:50}
+.nav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted);font-size:11px;font-weight:700}
+.nav button.on{color:var(--acc)}
+.nav svg{width:22px;height:22px}
+.fab{position:fixed;right:18px;bottom:calc(78px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:50%;
+  background:var(--acc);color:#fff;font-size:30px;font-weight:300;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:55}
+.fab:active,.btn:active,.chip:active{transform:scale(.96)}
+/* modal (bottom sheet) */
+.ov{position:fixed;inset:0;background:rgba(10,14,22,.45);z-index:100;display:flex;align-items:flex-end}
+.sheet{width:100%;max-height:92dvh;overflow-y:auto;background:var(--sheet,#f3f5f8);color:#10131a;border-radius:22px 22px 0 0;
+  padding:10px 16px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,.3)}
+.sheet .grip{width:40px;height:5px;border-radius:3px;background:#c9ced8;margin:0 auto 10px}
+.sheet h2{font-size:19px;font-weight:800;margin-bottom:8px}
+.sheet .hint{font-size:13.5px;color:rgba(16,19,26,.7);margin-bottom:10px}
+.fl{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:rgba(16,19,26,.65);margin:12px 0 6px}
+.inp{width:100%;border:1px solid #c9ced8;background:#fff;border-radius:12px;padding:11px 12px;outline:none}
+.inp:focus{border-color:var(--acc)}
+.inp.big{font-size:26px;font-weight:800;padding:8px 12px}
+.sheet .seg{background:#e3e7ee;border-color:#d3d8e1}
+.sheet .chip{background:#fff;border-color:#d3d8e1}
+.sheet .chip.on{background:var(--acc);border-color:var(--acc)}
+.sheet .btn.ghost{background:#e3e7ee;border-color:#d3d8e1}
+.colors{display:flex;gap:8px;flex-wrap:wrap}
+.colors button{width:34px;height:34px;border-radius:50%;border:3px solid transparent}
+.colors button.on{border-color:#10131a}
+.check{display:flex;align-items:center;gap:10px;margin-top:12px;font-weight:600}
+.check input{width:20px;height:20px;accent-color:var(--acc)}
+.toast{position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#10131a;color:#fff;
+  padding:10px 16px;border-radius:12px;font-size:14.5px;font-weight:600;z-index:200;max-width:86vw;text-align:center;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:.95}
+.hb{position:relative;height:13px;background:var(--surface2);border-radius:4px;flex:1}
+.hb i{position:absolute;left:0;top:0;bottom:0;border-radius:4px}
+.hb em{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--txt)}
+.tbl .tr{display:flex;align-items:center;border-top:1px solid var(--line);padding:6px 0;font-size:14.5px}
+.tbl .th{display:flex;font-size:12px;color:var(--muted);font-weight:700;padding-bottom:4px}
+.tbl .c1{flex:1;min-width:0}
+.tbl .c2{width:84px;text-align:right}
+.tbl .c3{width:50px;text-align:right;color:var(--muted);font-weight:600}
+.del{color:var(--neg);font-weight:800;font-size:18px;width:36px;height:36px}
+</style>
+</head>
+<body>
+<header class="head" id="hd"></header>
+<main id="scr"></main>
+<nav class="nav" id="nav" aria-label="Разделы"></nav>
+<button class="fab" id="fab" aria-label="Добавить операцию" onclick="openOpModal()">+</button>
+<div id="sumbar"></div>
+<div id="modal"></div>
+<div class="toast" id="toast" role="status"></div>
+<input type="file" id="fileIn" accept=".json,application/json" style="display:none">
+
+<script>
+'use strict';
+/* =====================================================================
+   «Финансовый поток» — этап 1.
+   Данные хранятся в localStorage (ключ fflow_v1) на устройстве.
+   Облако (Firebase), SMS банков и советы по трендам — следующие этапы.
+   ===================================================================== */
+const STORE_KEY = 'fflow_v1';
+const BACKUP_VERSION = 1;
+
+/* ---------- утилиты ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const num = v => { const n = parseFloat(String(v == null ? '' : v).replace(',', '.').replace(/\s/g, '')); return isFinite(n) ? n : 0; };
+const r2 = n => Math.round(n * 100) / 100;
+const CUR = {GEL:'₾', USD:'$', EUR:'€'};
+function money(n, cur){
+  cur = cur || 'GEL';
+  const neg = n < 0; n = Math.abs(r2(n));
+  let s = Number.isInteger(n) ? String(n) : n.toFixed(2);
+  const [a, b] = s.split('.');
+  s = a.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + (b ? ',' + b : '');
+  const sym = CUR[cur] || cur;
+  return (neg ? '−' : '') + (cur === 'GEL' ? s + ' ' + sym : sym + s);
+}
+const signed = (n, cur) => (n > 0 ? '+' : '') + money(n, cur);
+function hm(min){
+  min = Math.round(min || 0);
+  const h = Math.floor(min / 60), m = min % 60;
+  if (!h) return m + ' мин';
+  return h + ' ч' + (m ? ' ' + m + ' мин' : '');
+}
+const pad = n => String(n).padStart(2, '0');
+const dstr = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const today = () => dstr(new Date());
+const parseD = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const MON = ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+const MONG = ['янв.','февр.','мар.','апр.','мая','июня','июля','авг.','сент.','окт.','нояб.','дек.'];
+const dHuman = s => { const d = parseD(s); return d.getDate() + ' ' + MONG[d.getMonth()]; };
+function plural(n, a, b, c){ n = Math.abs(n) % 100; const k = n % 10; if (n > 10 && n < 20) return c; if (k > 1 && k < 5) return b; if (k === 1) return a; return c; }
+
+/* ---------- период ---------- */
+function range(per, off){
+  const now = new Date();
+  if (per === 'week'){
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const wd = (d.getDay() + 6) % 7;
+    const from = new Date(d); from.setDate(d.getDate() - wd + off * 7);
+    const to = new Date(from); to.setDate(from.getDate() + 6);
+    const label = from.getMonth() === to.getMonth()
+      ? from.getDate() + '–' + to.getDate() + ' ' + MONG[to.getMonth()]
+      : dHuman(dstr(from)) + ' – ' + dHuman(dstr(to));
+    return {from: dstr(from), to: dstr(to), label};
+  }
+  if (per === 'month'){
+    const from = new Date(now.getFullYear(), now.getMonth() + off, 1);
+    const to = new Date(from.getFullYear(), from.getMonth() + 1, 0);
+    return {from: dstr(from), to: dstr(to), label: MON[from.getMonth()] + ' ' + from.getFullYear()};
+  }
+  if (per === 'year'){
+    const y = now.getFullYear() + off;
+    return {from: y + '-01-01', to: y + '-12-31', label: String(y)};
+  }
+  return {from: '0000-01-01', to: '9999-12-31', label: 'всё время'};
+}
+const inR = (d, R) => d >= R.from && d <= R.to;
+/* тот же по длине период непосредственно перед текущим — для сравнения расходов */
+function prevRange(per, off){ return per === 'all' ? null : range(per, off - 1); }
+
+/* ---------- данные по умолчанию ---------- */
+/* Работы мастерской — из прейскуранта (репозиторий shoe-repair-prices).
+   Где в прейскуранте диапазон, взята нижняя цена; время и материал — заполнить. */
+const WORKSHOP = [
+  ['Набойки на шпильку',15],['Набойки женские',20],['Набойки мужские',35],['Профилактика женская',35],
+  ['Профилактика мужская',40],['Обтяжка каблука',80],['Подклейка',5],['Переклейка подошвы',30],
+  ['Прошивка подошвы по кругу',40],['Замена подошвы',150],['Укорочение голенища',70],['Ушивка голенища',70],
+  ['Замена молнии (пластик)',30],['Замена молнии (металл)',40],['Бегунок',15],['Люверс',5],['Хольнитен',5],
+  ['Латка',15],['Штопка',10],['Задники (подклад)',60],['Замена плащёвки на кроссовках',80],
+  ['Замена гранитола — носок',80],['Замена гранитола — пятка',80],['Вставки фигурные',50],
+  ['Супинатор',25],['Стельки',30],['Стельки кожаные + картонные',50],['Чистка',30],['Растяжка',15]
+];
+const DEFAULT_GROUPS = [
+  {id:'home', name:'Бытовые', color:'#2e8bd6', cats:['Жильё','Питание','Учёба','Медицина','Одежда','Связь и подписки','Экстренные']},
+  {id:'work', name:'Рабочие', color:'#e07b2e', cats:['Материал','Инструмент','Аренда','Сервисы и подписки','Прочее']},
+  {id:'fun',  name:'Развлечения', color:'#b05cc7', cats:['Кафе','Спонтанные покупки','Игрушки','Отдых','Отпуск']}
+];
+const PALETTE = ['#e07b2e','#b05cc7','#3a9e6a','#2e8bd6','#d64545','#c2a01e','#1aa3a3','#6b4fb3','#7a8699'];
+
+function defaultState(){
+  return {
+    v: 1,
+    flows: [
+      {id:'f_ws', name:'Мастерская', color:'#e07b2e', type:'service', share:60, invest:false,
+        acts: WORKSHOP.map(([n, p]) => ({id: uid(), name: n, price: p, min: 0, mat: 0}))},
+      {id:'f_jw', name:'Ювелирка', color:'#b05cc7', type:'service', share:100, invest:false, acts:[]},
+      {id:'f_dev', name:'Разработка', color:'#3a9e6a', type:'service', share:100, invest:true, acts:[]},
+      {id:'f_tr', name:'Трейдинг', color:'#2e8bd6', type:'portfolio', share:100, invest:false, cur:'USD', acts:[]}
+    ],
+    works: [],   // {id,date,flowId,actId,name,n,price,min,mat,share}
+    hours: [],   // {id,date,flowId,min,note}
+    ops: [],     // {id,date,kind:'exp'|'inc',amount,cur,group,cat,flowId,note}
+    pf: [],      // {id,date,flowId,kind:'dep'|'wd'|'pnl',amount,note}  (в валюте потока)
+    groups: JSON.parse(JSON.stringify(DEFAULT_GROUPS)),
+    rates: {USD: 2.7, EUR: 3.1},
+    per: 'month',
+    draft: null  // незавершённая отметка работ: {flowId,date,n:{},price:{}}
+  };
+}
+
+/* ---------- хранилище ---------- */
+let state;
+function load(){
+  try { const raw = localStorage.getItem(STORE_KEY); state = raw ? JSON.parse(raw) : null; } catch(e){ state = null; }
+  if (!state || !Array.isArray(state.flows)) state = defaultState();
+  normalize();
+}
+function normalize(){
+  const d = defaultState();
+  for (const k of ['works','hours','ops','pf']) if (!Array.isArray(state[k])) state[k] = [];
+  if (!Array.isArray(state.groups) || !state.groups.length) state.groups = d.groups;
+  if (!state.rates) state.rates = d.rates;
+  if (!state.per) state.per = 'month';
+  state.flows.forEach(f => { if (!Array.isArray(f.acts)) f.acts = []; if (!f.share) f.share = 100; if (!f.type) f.type = 'service'; });
+}
+function save(){
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); return true; }
+  catch(e){ toast('Не удалось сохранить: ' + (e.message || e)); return false; }
+}
+
+/* ---------- темы экранов (формула Планера) ---------- */
+const THEMES = {
+  overview: {top:{hue:222,sat:16}, bottom:{hue:152,sat:59}},
+  flows:    {top:{hue:152,sat:27}, bottom:{hue:320,sat:40}},
+  flow:     {top:{hue:152,sat:27}, bottom:{hue:320,sat:40}},
+  mark:     {top:{hue:30, sat:80}, bottom:{hue:265,sat:40}},
+  exp:      {top:{hue:15, sat:12}, bottom:{hue:200,sat:40}},
+  anal:     {top:{hue:108,sat:74}, bottom:{hue:265,sat:40}},
+  settings: {top:{hue:142,sat:14}, bottom:{hue:200,sat:40}}
+};
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+function hsl2rgb(h, s, l){
+  s /= 100; l /= 100;
+  const k = n => (n + h / 30) % 12, a = s * Math.min(l, 1 - l);
+  const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  return [Math.round(255 * f(0)), Math.round(255 * f(8)), Math.round(255 * f(4))];
+}
+function avgHue(h1, h2){
+  const a = h1 * Math.PI / 180, b = h2 * Math.PI / 180;
+  let d = Math.atan2((Math.sin(a) + Math.sin(b)) / 2, (Math.cos(a) + Math.cos(b)) / 2) * 180 / Math.PI;
+  return Math.round(d < 0 ? d + 360 : d);
+}
+function applyTheme(name){
+  const t = THEMES[name] || THEMES.overview;
+  const L = s => 97 - (s / 100) * 49;
+  const [tr, tg, tb] = hsl2rgb(t.top.hue, t.top.sat, L(t.top.sat));
+  const [br, bg, bb] = hsl2rgb(t.bottom.hue, t.bottom.sat, L(t.bottom.sat));
+  const R = document.documentElement.style;
+  R.setProperty('--bg', `linear-gradient(180deg, rgb(${tr},${tg},${tb}) 0%, rgb(${br},${bg},${bb}) 100%)`);
+  const sat = (t.top.sat + t.bottom.sat) / 2, hue = avgHue(t.top.hue, t.bottom.hue);
+  const bgL = L(sat), d = clamp((97 - bgL) / 49, 0, 1), sc = Math.min(sat, 42);
+  R.setProperty('--surface',  `hsl(${hue},${sc}%,${clamp(bgL + lerp(-6, 9, d), 8, 96)}%)`);
+  R.setProperty('--surface2', `hsl(${hue},${sc}%,${clamp(bgL + lerp(-11, 14, d), 8, 96)}%)`);
+  R.setProperty('--line',     `hsl(${hue},${sc}%,${clamp(bgL + lerp(-17, 20, d), 8, 96)}%)`);
+  const meta = document.querySelector('meta[name=theme-color]');
+  if (meta) meta.content = `rgb(${tr},${tg},${tb})`;
+}
+
+/* ---------- расчёты ---------- */
+const rate = c => state.rates[c] || 1;
+const toGEL = (a, c) => (!c || c === 'GEL') ? a : a * rate(c);
+const flowById = id => state.flows.find(f => f.id === id);
+const groupById = id => state.groups.find(g => g.id === id);
+
+/* Твой чистый ₾/час по одной работе (по нормам): (цена × доля − материал) / время */
+function actRate(f, a){
+  if (!a.min) return null;
+  return (a.price * f.share / 100 - a.mat) / a.min * 60;
+}
+function flowStats(f, R){
+  const s = {mine:0, gross:0, mat:0, wexp:0, min:0, count:0, pnl:0, net:0, rate:null};
+  for (const w of state.works) if (w.flowId === f.id && inR(w.date, R)){
+    s.gross += w.n * w.price; s.mine += w.n * w.price * w.share / 100; s.mat += w.n * w.mat; s.min += w.n * w.min; s.count += w.n;
+  }
+  for (const h of state.hours) if (h.flowId === f.id && inR(h.date, R)) s.min += h.min;
+  for (const o of state.ops) if (o.flowId === f.id && inR(o.date, R)){
+    if (o.kind === 'inc') s.mine += toGEL(o.amount, o.cur); else s.wexp += toGEL(o.amount, o.cur);
+  }
+  if (f.type === 'portfolio'){
+    for (const p of state.pf) if (p.flowId === f.id && p.kind === 'pnl' && inR(p.date, R)) s.pnl += p.amount;
+    s.mine += toGEL(s.pnl, f.cur || 'USD');
+  }
+  s.net = s.mine - s.mat - s.wexp;
+  s.rate = s.min > 0 ? s.net / (s.min / 60) : null;
+  return s;
+}
+function portfolioTotals(f){
+  const t = {dep:0, wd:0, pnl:0};
+  for (const p of state.pf) if (p.flowId === f.id) t[p.kind] += p.amount;
+  t.invested = t.dep - t.wd; t.now = t.invested + t.pnl;
+  t.yield = t.dep > 0 ? t.pnl / t.dep * 100 : null;
+  return t;
+}
+/* Итоги периода: заработано (твоя часть + доходы + результат портфеля), потрачено (операции + материал) */
+function totals(R, groupFilter){
+  let earned = 0, spent = 0, mat = 0;
+  for (const f of state.flows) earned += flowStats(f, R).mine;
+  for (const o of state.ops) if (o.kind === 'inc' && !o.flowId && inR(o.date, R)) earned += toGEL(o.amount, o.cur);
+  for (const o of state.ops) if (o.kind === 'exp' && inR(o.date, R) && (!groupFilter || o.group === groupFilter)) spent += toGEL(o.amount, o.cur);
+  if (!groupFilter || groupFilter === 'work') for (const w of state.works) if (inR(w.date, R)) mat += w.n * w.mat;
+  spent += mat;
+  return {earned, spent, mat, net: earned - spent};
+}
+/* Расходы по группам и категориям; материал по работам — строкой в «Рабочих» */
+function spendTree(R){
+  const tree = {};
+  for (const g of state.groups) tree[g.id] = {sum:0, cats:{}};
+  const add = (gid, cat, v) => {
+    if (!tree[gid]) tree[gid] = {sum:0, cats:{}};
+    tree[gid].sum += v; tree[gid].cats[cat] = (tree[gid].cats[cat] || 0) + v;
+  };
+  for (const o of state.ops) if (o.kind === 'exp' && inR(o.date, R)) add(o.group || 'home', o.cat || 'Прочее', toGEL(o.amount, o.cur));
+  let mat = 0;
+  for (const w of state.works) if (inR(w.date, R)) mat += w.n * w.mat;
+  if (mat) add('work', 'Материал по работам', mat);
+  return tree;
+}
+/* Средний ₾/час и выводы по направлениям */
+function analysis(R){
+  const rows = state.flows.map(f => ({f, s: flowStats(f, R)}));
+  const real = rows.filter(x => !x.f.invest && x.s.min > 0);
+  const net = real.reduce((a, x) => a + x.s.net, 0), min = real.reduce((a, x) => a + x.s.min, 0);
+  const avg = min > 0 ? net / (min / 60) : null;
+  const rates = real.map(x => x.s.rate);
+  // среднее только по услугам — для сравнения работ и советов по цене
+  const svc = real.filter(x => x.f.type === 'service');
+  const sNet = svc.reduce((a, x) => a + x.s.net, 0), sMin = svc.reduce((a, x) => a + x.s.min, 0);
+  const avgWork = sMin > 0 ? sNet / (sMin / 60) : null;
+  const lo = rates.length ? Math.min(...rates) : null, hi = rates.length ? Math.max(...rates) : null;
+  const mineAll = rows.filter(x => !x.f.invest).reduce((a, x) => a + Math.max(0, x.s.mine), 0);
+  for (const x of rows){
+    x.share = mineAll > 0 ? Math.max(0, x.s.mine) / mineAll : 0;
+    if (x.f.invest) x.verdict = ['Вложение', '#6b4fb3'];
+    else if (x.s.min <= 0 || avg == null) x.verdict = ['Нет времени', '#7a8699'];
+    else if (x.s.rate >= avg * 1.1) x.verdict = ['Усилить', '#1f5fd0'];
+    else if (x.s.rate >= avg * 0.9) x.verdict = ['Держать', '#0f6b3c'];
+    else if (x.share >= 0.2) x.verdict = ['Поднять цены', '#c25e12'];
+    else x.verdict = ['Пересмотреть', '#a8221a'];
+  }
+  return {rows, avg, lo, hi, avgWork};
+}
+
+/* ---------- навигация ---------- */
+let cur = 'overview';
+let curFlow = null;           // id потока на экранах flow / mark
+const stack = [];             // для «назад»
+const TABS = [
+  ['overview','Обзор','<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>'],
+  ['flows','Потоки','<path d="M3 8c3-3 6 3 9 0s6 3 9 0"/><path d="M3 16c3-3 6 3 9 0s6 3 9 0"/>'],
+  ['exp','Расходы','<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6"/><path d="M9 12h6"/>'],
+  ['anal','Анализ','<path d="M5 20V11"/><path d="M11 20V5"/><path d="M17 20v-7"/><path d="M3 20h18"/>'],
+  ['settings','Настройки','<path d="M4 6h9"/><path d="M17 6h3"/><path d="M4 12h3"/><path d="M11 12h9"/><path d="M4 18h11"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>']
+];
+function renderNav(){
+  const tab = (cur === 'flow' || cur === 'mark') ? 'flows' : cur;
+  $('#nav').innerHTML = TABS.map(([id, l, ic]) =>
+    `<button class="${id === tab ? 'on' : ''}" onclick="go('${id}')" aria-label="${l}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg><span>${l}</span></button>`).join('');
+}
+function go(name, opts){
+  if (name === 'flow' || name === 'mark'){ stack.push({cur, curFlow}); }
+  else stack.length = 0;
+  if (opts && opts.flowId) curFlow = opts.flowId;
+  cur = name;
+  render();
+  $('#scr').scrollTop = 0;
+}
+function back(){
+  if ($('#modal').innerHTML){ closeModal(); return true; }
+  if (stack.length){ const p = stack.pop(); cur = p.cur; curFlow = p.curFlow; render(); return true; }
+  if (cur !== 'overview'){ go('overview'); return true; }
+  return false;
+}
+window.onNativeBack = back;
+
+function head(title, right, withBack){
+  $('#hd').innerHTML = (withBack ? `<button class="hback" onclick="back()" aria-label="Назад">‹</button>` : '') +
+    `<h1>${esc(title)}</h1>` + (right || '');
+}
+function render(){
+  applyTheme(cur);
+  renderNav();
+  const mark = cur === 'mark';
+  $('#nav').style.display = mark ? 'none' : '';
+  $('#fab').style.display = (cur === 'overview' || cur === 'exp') ? '' : 'none';
+  $('#scr').classList.toggle('with-bar', mark);
+  if (!mark) $('#sumbar').innerHTML = '';
+  ({overview: rOverview, flows: rFlows, flow: rFlow, mark: rMark, exp: rExp, anal: rAnal, settings: rSettings}[cur] || rOverview)();
+}
+
+/* ---------- общие куски ---------- */
+function periodBlock(){
+  const R = range(state.per, state.pOff || 0);
+  const P = [['week','Неделя'],['month','Месяц'],['year','Год'],['all','Всё время']];
+  return `<div class="seg" role="group" aria-label="Период">${P.map(([k, l]) =>
+      `<button class="${state.per === k ? 'on' : ''}" onclick="setPer('${k}')">${l}</button>`).join('')}</div>` +
+    (state.per === 'all' ? '' :
+     `<div class="pnav"><button onclick="shiftPer(-1)" aria-label="Раньше">‹</button><span>${esc(R.label)}</span>` +
+     `<button onclick="shiftPer(1)" aria-label="Позже" ${(state.pOff || 0) >= 0 ? 'disabled style="opacity:.3"' : ''}>›</button></div>`);
+}
+function setPer(k){ state.per = k; state.pOff = 0; save(); render(); }
+function shiftPer(d){ state.pOff = Math.min(0, (state.pOff || 0) + d); save(); render(); }
+const curR = () => range(state.per, state.pOff || 0);
+const flowSub = (f, s) => f.type === 'portfolio' ? 'Портфель · ' + hm(s.min)
+  : (f.invest ? 'Вложение' : 'Услуги' + (f.share !== 100 ? ' · твои ' + f.share + ' %' : '')) + ' · ' + hm(s.min);
+const rateTxt = r => r == null ? '—' : Math.round(r) + ' ₾/ч';
+
+/* ---------- Обзор ---------- */
+function rOverview(){
+  const R = curR(), T = totals(R);
+  head('Обзор', `<span class="hright">${esc(R.label)}</span>`);
+  const tree = spendTree(R);
+  const gmax = Math.max(1, ...state.groups.map(g => (tree[g.id] || {}).sum || 0));
+  let h = periodBlock();
+  h += `<section class="card"><div class="small muted" style="font-weight:600">Чистый поток</div>
+    <div class="big ${T.net >= 0 ? 'pos' : 'neg'}">${signed(T.net)}</div>
+    <div class="grid2" style="margin-top:8px">
+      <div class="tile"><div class="l">Заработано</div><div class="v pos">${money(T.earned)}</div></div>
+      <div class="tile"><div class="l">Потрачено</div><div class="v neg">${money(T.spent)}</div></div></div></section>`;
+  h += `<div class="sec">Потоки</div><section class="card" style="padding:4px 14px">`;
+  for (const f of state.flows){
+    const s = flowStats(f, R);
+    h += `<button class="li" style="width:100%;text-align:left" onclick="go('flow',{flowId:'${f.id}'})">
+      <span class="dot" style="background:${f.color}"></span>
+      <span class="grow"><span class="t" style="display:block">${esc(f.name)}</span><span class="s" style="display:block">${flowSub(f, s)}</span></span>
+      <span class="r"><span style="display:block">${f.invest && !s.mine ? '—' : money(s.mine)}</span><span class="s" style="display:block">${f.invest ? 'расход ' + money(s.wexp + s.mat) : rateTxt(s.rate)}</span></span></button>`;
+  }
+  h += `</section><div class="sec">Расходы по группам</div><section class="card" style="padding:8px 14px">`;
+  for (const g of state.groups){
+    const v = (tree[g.id] || {}).sum || 0;
+    h += `<div style="padding:5px 0"><div class="row" style="justify-content:space-between;font-size:14.5px;font-weight:600"><span>${esc(g.name)}</span><b>${money(v)}</b></div>
+      <div class="bar"><i style="width:${Math.round(v / gmax * 100)}%;background:${g.color}"></i></div></div>`;
+  }
+  h += `</section>`;
+  if (!state.works.length && !state.ops.length) h += `<div class="empty">Начни с «Потоки → Мастерская → Отметить работы» или нажми «+», чтобы записать расход.</div>`;
+  $('#scr').innerHTML = h;
+}
+
+/* ---------- Потоки ---------- */
+function statGrid(items){ return `<div class="grid4">${items.map(([l, v, c]) => `<div class="stat"><div class="l">${l}</div><div class="v ${c || ''}">${v}</div></div>`).join('')}</div>`; }
+function flowCardStats(f, s){
+  if (f.type === 'portfolio'){
+    const t = portfolioTotals(f), c = f.cur || 'USD';
+    return statGrid([['Внесено', money(t.invested, c)], ['Сейчас', money(t.now, c)], ['Результат', signed(s.pnl, c), s.pnl >= 0 ? 'pos' : 'neg'], ['₾ в час', s.rate == null ? '—' : Math.round(s.rate)]]);
+  }
+  return statGrid([[f.share !== 100 ? 'Твой доход' : 'Доход', money(s.mine), 'pos'], ['Расход', money(s.mat + s.wexp), 'neg'], ['Часы', hm(s.min)], ['₾ в час', f.invest ? '—' : (s.rate == null ? '—' : Math.round(s.rate))]]);
+}
+function typeTag(f){ return f.type === 'portfolio' ? 'Портфель' : f.invest ? 'Вложение' : 'Услуги' + (f.share !== 100 ? ' · ' + f.share + ' %' : ''); }
+function rFlows(){
+  const R = curR();
+  head('Денежный поток', `<button class="hbtn" onclick="openFlowModal()">+ Поток</button>`);
+  let h = periodBlock();
+  for (const f of state.flows){
+    const s = flowStats(f, R);
+    h += `<section class="card" role="button" tabindex="0" onclick="go('flow',{flowId:'${f.id}'})">
+      <div class="row"><span class="dot" style="width:11px;height:11px;background:${f.color}"></span><span class="grow" style="font-size:17.5px;font-weight:700">${esc(f.name)}</span><span class="tag soft">${typeTag(f)}</span></div>
+      ${flowCardStats(f, s)}</section>`;
+  }
+  $('#scr').innerHTML = h;
+}
+
+/* ---------- Карточка потока ---------- */
+function rFlow(){
+  const f = flowById(curFlow);
+  if (!f){ go('flows'); return; }
+  const R = curR(), s = flowStats(f, R);
+  head(f.name, `<button class="hbtn ghost" onclick="openFlowModal('${f.id}')">Изменить</button>`, true);
+  let h = periodBlock();
+  h += `<section class="card"><div class="row"><span class="dot" style="background:${f.color}"></span><span class="grow" style="font-weight:700">${typeTag(f)}</span></div>${flowCardStats(f, s)}`;
+  if (f.type === 'service' && s.gross && f.share !== 100) h += `<div class="small muted" style="margin-top:8px">Клиенты заплатили ${money(s.gross)}, твои ${f.share} % — ${money(s.gross * f.share / 100)}, материал ${money(s.mat)}.</div>`;
+  h += `</section>`;
+  if (f.type === 'service'){
+    h += `<div class="btns" style="margin:0 0 4px"><button class="btn" onclick="go('mark',{flowId:'${f.id}'})">Отметить работы</button><button class="btn ghost" style="flex:.6" onclick="openHoursModal('${f.id}')">+ Время</button></div>`;
+    const noMin = f.acts.filter(a => !a.min).length;
+    h += `<div class="sec">Работы <span style="text-transform:none;letter-spacing:0;font-weight:600">· ${f.acts.length}</span></div>`;
+    if (noMin) h += `<div class="small warn" style="margin:0 2px 6px;font-weight:700">У ${noMin} ${plural(noMin, 'работы', 'работ', 'работ')} не указано время и материал — без них ₾/час не посчитать. Нажми на работу, чтобы заполнить.</div>`;
+    h += `<section class="card" style="padding:2px 14px">`;
+    if (!f.acts.length) h += `<div class="empty">Работ пока нет</div>`;
+    for (const a of f.acts){
+      const ar = actRate(f, a);
+      const mine = a.price * f.share / 100;
+      h += `<button class="li" style="width:100%;text-align:left" onclick="openActModal('${f.id}','${a.id}')">
+        <span class="grow"><span class="t" style="display:block;font-size:15px">${esc(a.name)}</span>
+        <span class="s" style="display:block">${f.share !== 100 ? 'клиент ' + money(a.price) + ' → твои ' + money(mine) : money(a.price)} · ${a.min ? a.min + ' мин' : '<span class="warn">время?</span>'} · мат. ${money(a.mat)}</span></span>
+        <span class="r">${ar == null ? '' : Math.round(ar) + ' ₾/ч'}</span></button>`;
+    }
+    h += `</section><button class="btn ghost" onclick="openActModal('${f.id}')">+ Работа</button>`;
+  } else {
+    h += `<div class="btns" style="margin:0 0 4px">
+      <button class="btn" onclick="openPfModal('${f.id}','pnl')">Результат</button>
+      <button class="btn ghost" onclick="openPfModal('${f.id}','dep')">Внёс</button>
+      <button class="btn ghost" onclick="openPfModal('${f.id}','wd')">Вывел</button></div>
+      <button class="btn ghost" onclick="openHoursModal('${f.id}')">+ Время</button>`;
+  }
+  h += `<div class="sec">Журнал</div><section class="card" style="padding:2px 14px">${journal(f)}</section>`;
+  $('#scr').innerHTML = h;
+}
+function journal(f){
+  const items = [];
+  for (const w of state.works) if (w.flowId === f.id) items.push({date: w.date, id: w.id, k: 'works', t: w.name + ' ×' + w.n, v: money(w.n * w.price * w.share / 100), s: hm(w.n * w.min)});
+  for (const x of state.hours) if (x.flowId === f.id) items.push({date: x.date, id: x.id, k: 'hours', t: 'Время' + (x.note ? ' · ' + x.note : ''), v: hm(x.min), s: ''});
+  for (const o of state.ops) if (o.flowId === f.id) items.push({date: o.date, id: o.id, k: 'ops', t: (o.cat || (o.kind === 'inc' ? 'Доход' : 'Расход')) + (o.note ? ' · ' + o.note : ''), v: (o.kind === 'inc' ? '+' : '−') + money(o.amount, o.cur), s: ''});
+  const PK = {dep: 'Внёс', wd: 'Вывел', pnl: 'Результат'};
+  for (const p of state.pf) if (p.flowId === f.id) items.push({date: p.date, id: p.id, k: 'pf', t: PK[p.kind] + (p.note ? ' · ' + p.note : ''), v: p.kind === 'pnl' ? signed(p.amount, f.cur || 'USD') : money(p.amount, f.cur || 'USD'), s: ''});
+  items.sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0);
+  if (!items.length) return `<div class="empty">Записей пока нет</div>`;
+  return items.slice(0, 40).map(i => `<div class="li"><span class="grow"><span class="t" style="display:block;font-size:14.5px">${esc(i.t)}</span><span class="s" style="display:block">${dHuman(i.date)}${i.s ? ' · ' + i.s : ''}</span></span>
+    <span class="r" style="font-size:14.5px">${esc(i.v)}</span><button class="del" aria-label="Удалить запись" onclick="delEntry('${i.k}','${i.id}')">×</button></div>`).join('');
+}
+function delEntry(k, id){
+  confirmModal('Удалить запись?', 'Её нельзя будет вернуть.', 'Удалить', () => {
+    state[k] = state[k].filter(x => x.id !== id); save(); render(); toast('Удалено');
+  });
+}
+
+/* ---------- Отметить работы ---------- */
+function draft(){
+  const f = flowById(curFlow);
+  if (!state.draft || state.draft.flowId !== curFlow) state.draft = {flowId: curFlow, date: today(), n: {}, price: {}};
+  if (!f.acts.length) return state.draft;
+  return state.draft;
+}
+let markQuery = '';
+let markOrder = [];   // порядок списка фиксируется при открытии экрана, чтобы строки не прыгали при нажатиях
+function usage(f){
+  const u = {};
+  for (const w of state.works) if (w.flowId === f.id) u[w.actId] = (u[w.actId] || 0) + w.n;
+  return u;
+}
+function rMark(){
+  const f = flowById(curFlow);
+  if (!f){ go('flows'); return; }
+  const D = draft();
+  const isToday = D.date === today();
+  head(f.name, `<div class="datebar"><button onclick="markDay(-1)" aria-label="День назад">‹</button><span>${isToday ? 'Сегодня, ' : ''}${dHuman(D.date)}</span><button onclick="markDay(1)" aria-label="День вперёд" ${isToday ? 'disabled style="opacity:.3"' : ''}>›</button></div>`, true);
+  const u = usage(f);
+  markOrder = f.acts.slice().sort((a, b) => ((D.n[b.id] ? 1 : 0) - (D.n[a.id] ? 1 : 0)) || ((u[b.id] || 0) - (u[a.id] || 0))).map(a => a.id);
+  let h = `<label class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+    <input type="search" id="mq" placeholder="Поиск работы" aria-label="Поиск работы" value="${esc(markQuery)}" oninput="markQuery=this.value;rMarkList()"></label>
+    <div class="small" style="font-weight:600;margin:0 2px 8px">Частые сверху · нажми на название, чтобы поставить свою цену для этой записи</div>
+    <section class="card" style="padding:2px 12px" id="mlist"></section>`;
+  const done = state.works.filter(w => w.flowId === f.id && w.date === D.date);
+  if (done.length){
+    h += `<div class="sec">Проведено за ${isToday ? 'сегодня' : dHuman(D.date)}</div><section class="card" style="padding:2px 14px">` +
+      done.map(w => `<div class="li"><span class="grow"><span class="t" style="display:block;font-size:14.5px">${esc(w.name)} ×${w.n}</span><span class="s" style="display:block">${money(w.price)} за шт.</span></span><span class="r" style="font-size:14.5px">${money(w.n * w.price * w.share / 100)}</span><button class="del" aria-label="Удалить" onclick="delEntry('works','${w.id}')">×</button></div>`).join('') + `</section>`;
+  }
+  $('#scr').innerHTML = h;
+  rMarkList();
+  rSumBar();
+}
+function rMarkList(){
+  const f = flowById(curFlow), D = draft(), q = markQuery.trim().toLowerCase();
+  const byId = {}; f.acts.forEach(a => byId[a.id] = a);
+  const list = markOrder.map(id => byId[id]).filter(a => a && (!q || a.name.toLowerCase().includes(q)));
+  const box = $('#mlist'); if (!box) return;
+  if (!f.acts.length){ box.innerHTML = `<div class="empty">Сначала добавь работы в карточке потока</div>`; return; }
+  if (!list.length){ box.innerHTML = `<div class="empty">Ничего не найдено</div>`; return; }
+  box.innerHTML = list.map(a => {
+    const n = D.n[a.id] || 0, own = D.price[a.id] != null, p = own ? D.price[a.id] : a.price;
+    return `<div class="li"><button class="grow" style="text-align:left" onclick="openDraftPrice('${a.id}')">
+      <span class="t" style="display:block;font-size:15.5px">${esc(a.name)}</span>
+      <span class="s" style="display:block">${own ? '<b class="warn">своя цена</b> ' : 'клиент '}${money(p)}${a.min ? ' · ' + a.min + ' мин' : ''}</span></button>
+      <div class="cnt"><button class="m" aria-label="Убрать одну: ${esc(a.name)}" onclick="bump('${a.id}',-1)">−</button><b>${n}</b><button class="p" aria-label="Добавить одну: ${esc(a.name)}" onclick="bump('${a.id}',1)">+</button></div></div>`;
+  }).join('');
+}
+function draftSum(){
+  const f = flowById(curFlow), D = draft();
+  let cnt = 0, sum = 0, min = 0, mat = 0;
+  for (const a of f.acts){
+    const n = D.n[a.id] || 0; if (!n) continue;
+    const p = D.price[a.id] != null ? D.price[a.id] : a.price;
+    cnt += n; sum += n * p; min += n * a.min; mat += n * a.mat;
+  }
+  const mine = sum * f.share / 100, net = mine - mat;
+  return {cnt, sum, min, mat, mine, net, rate: min ? net / min * 60 : null};
+}
+function rSumBar(){
+  const f = flowById(curFlow), S = draftSum();
+  $('#sumbar').innerHTML = `<div class="sumbar"><div class="grid4" style="margin-top:0">
+    <div class="stat"><div class="l">Клиенты</div><div class="v">${money(S.sum)}</div></div>
+    <div class="stat"><div class="l">Время</div><div class="v">${S.min ? hm(S.min) : '—'}</div></div>
+    <div class="stat"><div class="l">Материал</div><div class="v">${money(S.mat)}</div></div>
+    <div class="stat"><div class="l">₾ в час</div><div class="v">${S.rate == null ? '—' : Math.round(S.rate)}</div></div></div>
+    <div class="row" style="margin-top:10px"><div class="grow"><div class="small muted" style="font-weight:600">${f.share !== 100 ? 'Твои ' + f.share + ' % · чистыми' : 'Доход · чистыми'}</div>
+    <div style="font-size:22px;font-weight:800">${money(S.mine)} <span class="pos" style="font-size:15px">· ${money(S.net)}</span></div></div>
+    <button class="hbtn" style="font-size:16px;font-weight:800;border-radius:12px;padding:13px 20px;${S.cnt ? '' : 'opacity:.5'}" onclick="postDraft()" ${S.cnt ? '' : 'disabled'}>Провести</button></div></div>`;
+}
+function bump(id, d){
+  const D = draft();
+  D.n[id] = Math.max(0, (D.n[id] || 0) + d);
+  if (!D.n[id]) delete D.n[id];
+  save(); rMarkList(); rSumBar();
+}
+function markDay(d){
+  const D = draft(), x = parseD(D.date); x.setDate(x.getDate() + d);
+  const s = dstr(x); if (s > today()) return;
+  D.date = s; save(); rMark();
+}
+function openDraftPrice(id){
+  const f = flowById(curFlow), a = f.acts.find(x => x.id === id), D = draft();
+  const p = D.price[id] != null ? D.price[id] : a.price;
+  showModal(`<h2>${esc(a.name)}</h2><div class="hint">Цена для клиента только в этой записи. В карточке работы останется ${money(a.price)}.</div>
+    <input class="inp big" id="dp" inputmode="decimal" value="${p}" aria-label="Цена">
+    <div class="btns"><button class="btn ghost" onclick="setDraftPrice('${id}',null)">Как в списке</button><button class="btn" onclick="setDraftPrice('${id}',num($('#dp').value))">Готово</button></div>`);
+  setTimeout(() => { const i = $('#dp'); if (i){ i.focus(); i.select(); } }, 60);
+}
+function setDraftPrice(id, v){
+  const D = draft(), a = flowById(curFlow).acts.find(x => x.id === id);
+  if (v == null || v === a.price) delete D.price[id]; else D.price[id] = v;
+  save(); closeModal(); rMarkList(); rSumBar();
+}
+function postDraft(){
+  const f = flowById(curFlow), D = draft();
+  let k = 0;
+  for (const a of f.acts){
+    const n = D.n[a.id] || 0; if (!n) continue;
+    const p = D.price[a.id] != null ? D.price[a.id] : a.price;
+    state.works.push({id: uid(), date: D.date, flowId: f.id, actId: a.id, name: a.name, n, price: p, min: a.min, mat: a.mat, share: f.share});
+    k += n;
+  }
+  if (!k) return;
+  state.draft = {flowId: f.id, date: D.date, n: {}, price: {}};
+  save(); rMark(); toast('Проведено: ' + k + ' ' + plural(k, 'работа', 'работы', 'работ'));
+}
+
+/* ---------- Расходы ---------- */
+let expFilter = '', expOpen = {home: true};
+function rExp(){
+  const R = curR();
+  head('Расходы', `<span class="hright">${esc(R.label)}</span>`);
+  const T = totals(R, expFilter || null), tree = spendTree(R);
+  let h = periodBlock();
+  h += `<div class="chips" style="margin-bottom:10px">` +
+    [['', 'Все'], ...state.groups.map(g => [g.id, g.name])].map(([id, l]) => `<button class="chip ${expFilter === id ? 'on' : ''}" onclick="expFilter='${id}';rExp()">${esc(l)}</button>`).join('') + `</div>`;
+  h += `<div class="grid2" style="margin-bottom:10px"><section class="card" style="margin:0;padding:9px 12px"><div class="small muted" style="font-weight:600">Потрачено</div><div style="font-size:21px;font-weight:800" class="neg">${money(T.spent)}</div></section>
+    <section class="card" style="margin:0;padding:9px 12px"><div class="small muted" style="font-weight:600">Заработано</div><div style="font-size:21px;font-weight:800" class="pos">${money(totals(R).earned)}</div></section></div>`;
+  const all = state.groups.reduce((a, g) => a + ((tree[g.id] || {}).sum || 0), 0) || 1;
+  h += `<section class="card tbl" style="padding:9px 12px"><div class="th"><span class="c1">Категория</span><span class="c2">Сумма</span><span class="c3">Доля</span></div>`;
+  for (const g of state.groups){
+    if (expFilter && g.id !== expFilter) continue;
+    const t = tree[g.id] || {sum: 0, cats: {}}, open = expFilter ? true : !!expOpen[g.id];
+    h += `<button class="tr" style="width:100%;text-align:left" onclick="expOpen['${g.id}']=!expOpen['${g.id}'];rExp()" aria-expanded="${open}">
+      <span class="c1" style="font-weight:800">${open ? '▾' : '▸'} ${esc(g.name)}</span><span class="c2" style="font-weight:800">${money(t.sum)}</span><span class="c3">${Math.round(t.sum / all * 100)} %</span></button>`;
+    if (open){
+      const cats = Object.entries(t.cats).sort((a, b) => b[1] - a[1]);
+      if (!cats.length) h += `<div class="tr"><span class="c1 muted" style="padding-left:16px">нет расходов</span></div>`;
+      for (const [c, v] of cats) h += `<div class="tr"><span class="c1" style="padding-left:16px">${esc(c)}</span><span class="c2">${money(v)}</span><span class="c3">${Math.round(v / all * 100)} %</span></div>`;
+    }
+  }
+  h += `</section>`;
+  const ops = state.ops.filter(o => inR(o.date, R) && (!expFilter || o.group === expFilter || (o.kind === 'inc' && !expFilter)))
+    .sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0);
+  h += `<div class="sec">Операции</div><section class="card" style="padding:2px 14px">`;
+  if (!ops.length) h += `<div class="empty">Операций за период нет. Нажми «+», чтобы добавить.</div>`;
+  for (const o of ops.slice(0, 100)){
+    const g = groupById(o.group), fl = o.flowId ? flowById(o.flowId) : null;
+    h += `<button class="li" style="width:100%;text-align:left" onclick="openOpModal('${o.id}')">
+      <span class="dot" style="background:${o.kind === 'inc' ? '#0f6b3c' : (g ? g.color : '#7a8699')}"></span>
+      <span class="grow"><span class="t" style="display:block;font-size:15px">${esc(o.cat || (o.kind === 'inc' ? 'Доход' : 'Расход'))}${o.note ? ' · ' + esc(o.note) : ''}</span>
+      <span class="s" style="display:block">${dHuman(o.date)}${g && o.kind === 'exp' ? ' · ' + esc(g.name) : ''}${fl ? ' · ' + esc(fl.name) : ''}</span></span>
+      <span class="r ${o.kind === 'inc' ? 'pos' : ''}">${o.kind === 'inc' ? '+' : '−'}${money(o.amount, o.cur)}</span></button>`;
+  }
+  h += `</section>`;
+  $('#scr').innerHTML = h;
+}
+
+/* ---------- Анализ ---------- */
+function rAnal(){
+  const R = curR(), A = analysis(R);
+  head('Анализ', `<span class="hright">${esc(R.label)}</span>`);
+  let h = periodBlock();
+  h += `<section class="card"><div class="row" style="justify-content:space-between;align-items:baseline"><h2 style="font-size:15.5px;font-weight:800">Направления</h2>
+    <span class="small" style="font-weight:700">${A.avg == null ? 'нет данных о времени' : 'среднее ' + Math.round(A.avg) + ' ₾/ч · ' + Math.round(A.lo) + '–' + Math.round(A.hi)}</span></div>
+    <div class="tbl" style="margin-top:6px"><div class="th"><span class="c1">Поток</span><span style="width:54px;text-align:right">₾/ч</span><span style="width:50px;text-align:right">доход</span><span style="width:104px;text-align:right">вывод</span></div>`;
+  for (const x of A.rows){
+    h += `<div class="tr"><span class="c1" style="font-weight:700">${esc(x.f.name)}</span><span style="width:54px;text-align:right;font-weight:800">${x.s.rate == null || x.f.invest ? '—' : Math.round(x.s.rate)}</span>
+      <span style="width:50px;text-align:right" class="muted">${x.f.invest ? '—' : Math.round(x.share * 100) + ' %'}</span>
+      <span style="width:104px;text-align:right"><span class="tag" style="background:${x.verdict[1]}">${x.verdict[0]}</span></span></div>`;
+  }
+  h += `</div><div class="small muted" style="margin-top:6px">₾/ч — твоя часть чистыми, после материала и рабочих расходов. «Вложение» по ₾/ч не оценивается.</div></section>`;
+
+  // работы по нормам
+  const bars = [];
+  let missing = 0;
+  for (const f of state.flows){
+    if (f.type !== 'service' || f.invest) continue;
+    for (const a of f.acts){ const r = actRate(f, a); if (r == null){ missing++; continue; } bars.push({name: a.name, v: r, f, a}); }
+  }
+  bars.sort((a, b) => b.v - a.v);
+  const W = A.avgWork;
+  const top = bars.slice(0, 12), mx = Math.max(1, ...top.map(b => b.v), W || 0);
+  h += `<section class="card"><div class="row" style="justify-content:space-between;align-items:baseline"><h2 style="font-size:15.5px;font-weight:800">₾ в час по работам</h2><span class="small" style="font-weight:700">по нормам</span></div><div style="margin-top:6px">`;
+  if (!top.length) h += `<div class="empty">Укажи время и материал у работ в карточке потока — здесь появится сравнение.</div>`;
+  for (const b of top){
+    const below = W != null && b.v < W;
+    h += `<div class="row" style="gap:8px;padding:2px 0"><span style="width:118px;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(b.name)}</span>
+      <span class="hb"><i style="width:${Math.max(2, Math.round(Math.max(0, b.v) / mx * 100))}%;background:${below ? '#c25e12' : '#1f5fd0'}"></i>${W != null ? `<em style="left:${Math.round(W / mx * 100)}%"></em>` : ''}</span>
+      <span style="width:30px;text-align:right;font-size:13px;font-weight:800">${Math.round(b.v)}</span></div>`;
+  }
+  if (missing) h += `<div class="small warn" style="margin-top:6px;font-weight:700">Ещё у ${missing} ${plural(missing, 'работы', 'работ', 'работ')} нет времени — их нет в сравнении.</div>`;
+  if (W != null && top.length) h += `<div class="small muted" style="margin-top:4px">Черта — среднее по услугам ${Math.round(W)} ₾/ч. Синие выше, оранжевые ниже.</div>`;
+  h += `</div></section>`;
+
+  // советы
+  const tips = [];
+  if (W != null){
+    const used = {};
+    for (const w of state.works) if (inR(w.date, R)) used[w.actId] = (used[w.actId] || 0) + w.n;
+    const low = bars.filter(b => b.v < W * 0.9).sort((x, y) => (used[y.a.id] || 0) - (used[x.a.id] || 0));
+    for (const b of low.slice(0, 3)){
+      const np = Math.ceil((W * b.a.min / 60 + b.a.mat) / (b.f.share / 100));
+      if (np > b.a.price) tips.push(['Поднять цену', '#1f5fd0', `${b.name}: ${money(np)} для клиента (сейчас ${money(b.a.price)})`,
+        `Сейчас ${Math.round(b.v)} ₾/ч при среднем по услугам ${Math.round(W)}. С новой ценой выйдешь на среднее.` + (used[b.a.id] ? ` За период: ${used[b.a.id]} шт.` : '')]);
+    }
+    const strong = bars.filter(b => b.v >= W * 1.3).slice(0, 2);
+    for (const b of strong) tips.push(['Усилить', '#0f6b3c', `${b.name} — ${Math.round(b.v)} ₾/ч`, `На ${Math.round((b.v / W - 1) * 100)} % выше среднего по услугам. Брать в первую очередь.`]);
+  }
+  const PR = prevRange(state.per, state.pOff || 0);
+  if (PR){
+    const a = spendTree(R), b = spendTree(PR);
+    const grow = [];
+    for (const g of state.groups){
+      const ca = (a[g.id] || {}).cats || {}, cb = (b[g.id] || {}).cats || {};
+      for (const c in ca){ const now = ca[c], was = cb[c] || 0; if (was > 0 && now - was >= 20 && now / was >= 1.2) grow.push([c, now, was]); }
+    }
+    grow.sort((x, y) => (y[1] - y[2]) - (x[1] - x[2]));
+    for (const [c, now, was] of grow.slice(0, 2)) tips.push(['Урезать', '#6b4fb3', `${c}: +${Math.round((now / was - 1) * 100)} %`, `${money(now)} против ${money(was)} в прошлом периоде.`]);
+  }
+  h += `<div class="sec">Советы</div>`;
+  if (!tips.length) h += `<section class="card"><div class="empty" style="padding:12px">Пока советов нет. Они появятся, когда будут работы со временем и расходы за два периода.</div></section>`;
+  for (const [tag, col, t, s] of tips) h += `<section class="card row" style="align-items:flex-start;padding:9px 12px"><span class="tag" style="background:${col};margin-top:2px">${tag}</span><span class="grow"><span style="display:block;font-weight:700;font-size:14.5px">${esc(t)}</span><span class="small muted" style="display:block">${esc(s)}</span></span></section>`;
+  $('#scr').innerHTML = h;
+}
+
+/* ---------- Настройки ---------- */
+function rSettings(){
+  head('Настройки');
+  let h = `<div class="sec">Группы и категории расходов</div>`;
+  for (const g of state.groups){
+    h += `<section class="card"><div class="row"><span class="dot" style="background:${g.color}"></span><b class="grow">${esc(g.name)}</b>
+      <button class="link small" onclick="renameGroup('${g.id}')">Переименовать</button></div>
+      <div class="chips" style="margin-top:8px">${g.cats.map((c, i) => `<button class="chip" onclick="editCat('${g.id}',${i})">${esc(c)}</button>`).join('')}
+      <button class="chip" style="border-style:dashed" onclick="addCat('${g.id}')">+ Категория</button></div></section>`;
+  }
+  h += `<button class="btn ghost" onclick="addGroup()">+ Группа</button>`;
+  h += `<div class="sec">Курсы валют к лари</div><section class="card"><div class="grid2">
+    <label><div class="small muted" style="font-weight:600">1 $ =</div><input class="inp" inputmode="decimal" value="${state.rates.USD}" onchange="setRate('USD',this.value)" aria-label="Курс доллара"></label>
+    <label><div class="small muted" style="font-weight:600">1 € =</div><input class="inp" inputmode="decimal" value="${state.rates.EUR}" onchange="setRate('EUR',this.value)" aria-label="Курс евро"></label></div>
+    <div class="small muted" style="margin-top:8px">Курс задаёшь сам — по нему пересчитываются операции в валюте и результат трейдинга. Автокурс НБГ появится позже.</div></section>`;
+  const nat = hasNative();
+  h += `<div class="sec">Резервная копия</div><section class="card"><div class="small muted" style="margin-bottom:10px">Все данные хранятся на этом телефоне. Сохраняй копию в облако или мессенджер, чтобы не потерять их при поломке телефона.</div>
+    <div class="btns" style="margin-top:0"><button class="btn" onclick="${nat ? 'openBackupTarget()' : 'downloadBackup()'}">${nat ? 'Сохранить копию' : 'Скачать копию'}</button>
+    <button class="btn ghost" onclick="${nat ? 'AndroidBridge.pickBackupFile()' : "$('#fileIn').click()"}">Восстановить</button></div>
+    <div class="small muted" id="bkInfo" style="margin-top:8px">${state.lastBackup ? 'Последняя копия: ' + dHuman(state.lastBackup) : 'Копий ещё не было'}</div></section>`;
+  h += `<div class="sec">О приложении</div><section class="card small muted">Финансовый поток · этап 1${nat && AndroidBridge.getAppVersionCode ? ' · сборка ' + AndroidBridge.getAppVersionCode() : ''}<br>Дальше: SMS банков, облако, советы по трендам, языки.</section>`;
+  $('#scr').innerHTML = h;
+}
+function setRate(c, v){ const n = num(v); if (n > 0){ state.rates[c] = n; save(); toast('Курс сохранён'); } }
+function renameGroup(id){
+  const g = groupById(id);
+  promptModal('Название группы', g.name, v => { if (v){ g.name = v; save(); render(); } }, id !== 'home' && id !== 'work' && id !== 'fun' ? () => {
+    if (state.ops.some(o => o.group === id)){ toast('В группе есть операции — сначала перенеси их'); return; }
+    state.groups = state.groups.filter(x => x.id !== id); save(); render();
+  } : null);
+}
+function addGroup(){
+  promptModal('Новая группа', '', v => { if (v){ state.groups.push({id: 'g' + uid(), name: v, color: PALETTE[state.groups.length % PALETTE.length], cats: []}); save(); render(); } });
+}
+function addCat(gid){
+  promptModal('Новая категория', '', v => { const g = groupById(gid); if (v && !g.cats.includes(v)){ g.cats.push(v); save(); render(); } });
+}
+function editCat(gid, i){
+  const g = groupById(gid), old = g.cats[i];
+  promptModal('Категория', old, v => {
+    if (!v || v === old) return;
+    g.cats[i] = v;
+    state.ops.forEach(o => { if (o.group === gid && o.cat === old) o.cat = v; });
+    save(); render();
+  }, () => { g.cats.splice(i, 1); save(); render(); });
+}
+
+/* ---------- окна ---------- */
+function showModal(html){
+  $('#modal').innerHTML = `<div class="ov" onclick="if(event.target===this)closeModal()"><div class="sheet" role="dialog" aria-modal="true"><div class="grip"></div>${html}</div></div>`;
+}
+function closeModal(){ $('#modal').innerHTML = ''; }
+function confirmModal(title, text, okLabel, onOk){
+  window._ok = () => { closeModal(); onOk(); };
+  showModal(`<h2>${esc(title)}</h2><div class="hint">${esc(text)}</div><div class="btns"><button class="btn ghost" onclick="closeModal()">Отмена</button><button class="btn danger" onclick="_ok()">${esc(okLabel)}</button></div>`);
+}
+function promptModal(title, val, onOk, onDel){
+  window._ok = () => { const v = $('#pm').value.trim(); closeModal(); onOk(v); };
+  window._del = onDel ? () => { closeModal(); onDel(); } : null;
+  showModal(`<h2>${esc(title)}</h2><input class="inp" id="pm" value="${esc(val)}" aria-label="${esc(title)}">
+    <div class="btns">${onDel ? `<button class="btn ghost" style="color:var(--neg)" onclick="_del()">Удалить</button>` : `<button class="btn ghost" onclick="closeModal()">Отмена</button>`}<button class="btn" onclick="_ok()">Готово</button></div>`);
+  setTimeout(() => { const i = $('#pm'); if (i) i.focus(); }, 60);
+}
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ---------- окно: операция (расход / доход) ---------- */
+let OP = null;
+function openOpModal(id){
+  const o = id ? state.ops.find(x => x.id === id) : null;
+  OP = o ? JSON.parse(JSON.stringify(o)) : {kind: 'exp', amount: '', cur: 'GEL', date: today(), group: 'home', cat: '', flowId: '', note: ''};
+  OP._id = o ? o.id : null;
+  drawOp();
+  if (!o) setTimeout(() => { const i = $('#opA'); if (i) i.focus(); }, 80);
+}
+function drawOp(){
+  const g = groupById(OP.group) || state.groups[0];
+  const flows = state.flows.filter(f => f.type === 'service' || OP.kind === 'exp');
+  showModal(`<h2>${OP._id ? 'Операция' : 'Новая операция'}</h2>
+    <div class="seg"><button class="${OP.kind === 'exp' ? 'on' : ''}" onclick="opSet('kind','exp')">Расход</button><button class="${OP.kind === 'inc' ? 'on' : ''}" onclick="opSet('kind','inc')">Доход</button></div>
+    <div class="row"><input class="inp big grow" id="opA" inputmode="decimal" placeholder="0" value="${OP.amount}" oninput="OP.amount=this.value" aria-label="Сумма">
+      <select class="inp" style="width:84px" onchange="OP.cur=this.value" aria-label="Валюта">${Object.keys(CUR).map(c => `<option value="${c}" ${OP.cur === c ? 'selected' : ''}>${CUR[c]}</option>`).join('')}</select></div>
+    ${OP.kind === 'exp' ? `<div class="fl">Группа</div><div class="chips">${state.groups.map(x => `<button class="chip ${x.id === g.id ? 'on' : ''}" onclick="opSet('group','${x.id}')">${esc(x.name)}</button>`).join('')}</div>
+    <div class="fl">Категория</div><div class="chips">${g.cats.map(c => `<button class="chip ${OP.cat === c ? 'on' : ''}" onclick="opSet('cat',${esc(JSON.stringify(c))})">${esc(c)}</button>`).join('')}
+      <button class="chip" style="border-style:dashed" onclick="opNewCat()">+ Своя</button></div>` : ''}
+    ${(OP.kind === 'inc' || g.id === 'work') ? `<div class="fl">${OP.kind === 'inc' ? 'К какому потоку' : 'Для какого потока'}</div><div class="chips">
+      <button class="chip ${!OP.flowId ? 'on' : ''}" onclick="opSet('flowId','')">${OP.kind === 'inc' ? 'Без потока' : 'Общее'}</button>
+      ${flows.map(f => `<button class="chip ${OP.flowId === f.id ? 'on' : ''}" onclick="opSet('flowId','${f.id}')">${esc(f.name)}</button>`).join('')}</div>` : ''}
+    <div class="grid2" style="margin-top:12px"><label><div class="fl" style="margin-top:0">Дата</div><input class="inp" type="date" value="${OP.date}" max="${today()}" onchange="OP.date=this.value" aria-label="Дата"></label>
+      <label><div class="fl" style="margin-top:0">Заметка</div><input class="inp" value="${esc(OP.note)}" oninput="OP.note=this.value" placeholder="необязательно" aria-label="Заметка"></label></div>
+    <div class="btns">${OP._id ? `<button class="btn ghost" style="color:var(--neg);flex:.6" onclick="delOp()">Удалить</button>` : `<button class="btn ghost" style="flex:.6" onclick="closeModal()">Отмена</button>`}<button class="btn" onclick="saveOp()">Сохранить</button></div>`);
+}
+function opSet(k, v){
+  OP[k] = v;
+  if (k === 'group'){ OP.cat = ''; if (v !== 'work') OP.flowId = ''; }
+  if (k === 'kind'){ OP.flowId = ''; }
+  const a = $('#opA'); if (a) OP.amount = a.value;
+  drawOp();
+}
+function opNewCat(){
+  const a = $('#opA'); if (a) OP.amount = a.value;
+  const keep = JSON.parse(JSON.stringify(OP));
+  promptModal('Новая категория', '', v => {
+    OP = keep;
+    const g = groupById(OP.group);
+    if (v && !g.cats.includes(v)){ g.cats.push(v); save(); }
+    if (v) OP.cat = v;
+    drawOp();
+  });
+}
+function saveOp(){
+  const a = $('#opA'); if (a) OP.amount = a.value;
+  const amount = num(OP.amount);
+  if (!(amount > 0)){ toast('Введи сумму'); return; }
+  if (OP.kind === 'exp' && !OP.cat){ toast('Выбери категорию'); return; }
+  const rec = {id: OP._id || uid(), date: OP.date || today(), kind: OP.kind, amount: r2(amount), cur: OP.cur,
+    group: OP.kind === 'exp' ? OP.group : '', cat: OP.kind === 'exp' ? OP.cat : 'Доход', flowId: OP.flowId || '', note: (OP.note || '').trim()};
+  if (OP._id) state.ops = state.ops.map(x => x.id === OP._id ? rec : x); else state.ops.push(rec);
+  save(); closeModal(); render(); toast(OP._id ? 'Сохранено' : (rec.kind === 'exp' ? 'Расход записан' : 'Доход записан'));
+}
+function delOp(){ const id = OP._id; confirmModal('Удалить операцию?', 'Её нельзя будет вернуть.', 'Удалить', () => { state.ops = state.ops.filter(x => x.id !== id); save(); render(); }); }
+
+/* ---------- окно: поток ---------- */
+let FL = null;
+function openFlowModal(id){
+  const f = id ? flowById(id) : null;
+  FL = f ? {name: f.name, type: f.type, share: f.share, invest: f.invest, color: f.color, cur: f.cur || 'USD', _id: f.id}
+         : {name: '', type: 'service', share: 100, invest: false, color: PALETTE[state.flows.length % PALETTE.length], cur: 'USD', _id: null};
+  drawFlow();
+}
+function drawFlow(){
+  showModal(`<h2>${FL._id ? 'Поток' : 'Новый поток'}</h2>
+    <div class="fl">Название</div><input class="inp" id="flN" value="${esc(FL.name)}" oninput="FL.name=this.value" placeholder="например, Ювелирка" aria-label="Название">
+    <div class="fl">Тип</div><div class="seg"><button class="${FL.type === 'service' ? 'on' : ''}" onclick="flSet('type','service')">Услуги</button><button class="${FL.type === 'portfolio' ? 'on' : ''}" onclick="flSet('type','portfolio')">Портфель</button></div>
+    ${FL.type === 'service' ? `<div class="fl">Моя доля от цены для клиента, %</div><input class="inp" inputmode="numeric" value="${FL.share}" oninput="FL.share=this.value" aria-label="Доля в процентах">
+      <label class="check"><input type="checkbox" ${FL.invest ? 'checked' : ''} onchange="FL.invest=this.checked"> Вложение — не оценивать по ₾/час (например, разработка без дохода)</label>`
+      : `<div class="fl">Валюта портфеля</div><div class="chips">${['USD', 'EUR', 'GEL'].map(c => `<button class="chip ${FL.cur === c ? 'on' : ''}" onclick="flSet('cur','${c}')">${CUR[c]}</button>`).join('')}</div>`}
+    <div class="fl">Цвет</div><div class="colors">${PALETTE.map(c => `<button class="${FL.color === c ? 'on' : ''}" style="background:${c}" aria-label="Цвет ${c}" onclick="flSet('color','${c}')"></button>`).join('')}</div>
+    <div class="btns">${FL._id ? `<button class="btn ghost" style="color:var(--neg);flex:.6" onclick="delFlow()">Удалить</button>` : `<button class="btn ghost" style="flex:.6" onclick="closeModal()">Отмена</button>`}<button class="btn" onclick="saveFlow()">Сохранить</button></div>`);
+}
+function flSet(k, v){ const n = $('#flN'); if (n) FL.name = n.value; FL[k] = v; drawFlow(); }
+function saveFlow(){
+  const name = (FL.name || '').trim();
+  if (!name){ toast('Введи название'); return; }
+  const share = clamp(Math.round(num(FL.share)) || 100, 1, 100);
+  if (FL._id){
+    const f = flowById(FL._id);
+    Object.assign(f, {name, type: FL.type, share, invest: FL.type === 'service' && !!FL.invest, color: FL.color, cur: FL.cur});
+  } else {
+    state.flows.push({id: 'f' + uid(), name, type: FL.type, share, invest: FL.type === 'service' && !!FL.invest, color: FL.color, cur: FL.cur, acts: []});
+  }
+  save(); closeModal(); render();
+}
+function delFlow(){
+  const id = FL._id, f = flowById(id);
+  const has = state.works.some(w => w.flowId === id) || state.hours.some(w => w.flowId === id) || state.pf.some(w => w.flowId === id) || state.ops.some(o => o.flowId === id);
+  confirmModal('Удалить поток «' + f.name + '»?', has ? 'Вместе с ним удалятся его работы, время и записи портфеля. Операции расходов останутся без потока.' : 'Записей у него нет.', 'Удалить', () => {
+    state.flows = state.flows.filter(x => x.id !== id);
+    state.works = state.works.filter(x => x.flowId !== id);
+    state.hours = state.hours.filter(x => x.flowId !== id);
+    state.pf = state.pf.filter(x => x.flowId !== id);
+    state.ops.forEach(o => { if (o.flowId === id) o.flowId = ''; });
+    save(); go('flows');
+  });
+}
+
+/* ---------- окно: работа ---------- */
+let AC = null;
+function openActModal(fid, aid){
+  const f = flowById(fid), a = aid ? f.acts.find(x => x.id === aid) : null;
+  AC = {fid, _id: a ? a.id : null, name: a ? a.name : '', price: a ? a.price : '', min: a ? a.min || '' : '', mat: a ? a.mat || '' : ''};
+  const sh = f.share;
+  showModal(`<h2>${a ? 'Работа' : 'Новая работа'}</h2>
+    <div class="fl">Название</div><input class="inp" id="acN" value="${esc(AC.name)}" aria-label="Название работы">
+    <div class="grid2"><label><div class="fl">Цена для клиента, ₾</div><input class="inp" id="acP" inputmode="decimal" value="${AC.price}" oninput="acCalc()" aria-label="Цена"></label>
+      <label><div class="fl">Время, мин</div><input class="inp" id="acM" inputmode="numeric" value="${AC.min}" oninput="acCalc()" aria-label="Время в минутах"></label></div>
+    <label><div class="fl">Материал на одну работу, ₾</div><input class="inp" id="acT" inputmode="decimal" value="${AC.mat}" oninput="acCalc()" aria-label="Материал"></label>
+    <div class="hint" id="acR" style="margin-top:10px"></div>
+    <div class="btns">${a ? `<button class="btn ghost" style="color:var(--neg);flex:.6" onclick="delAct()">Удалить</button>` : `<button class="btn ghost" style="flex:.6" onclick="closeModal()">Отмена</button>`}<button class="btn" onclick="saveAct()">Сохранить</button></div>`);
+  acCalc();
+  if (!a) setTimeout(() => $('#acN') && $('#acN').focus(), 80);
+  AC.share = sh;
+}
+function acCalc(){
+  const f = flowById(AC.fid), p = num($('#acP').value), m = num($('#acM').value), t = num($('#acT').value);
+  const mine = p * f.share / 100;
+  $('#acR').innerHTML = (f.share !== 100 ? `Твои ${f.share} %: <b>${money(mine)}</b>. ` : '') +
+    (m > 0 ? `Чистыми <b>${money(mine - t)}</b> за ${m} мин → <b>${Math.round((mine - t) / m * 60)} ₾/час</b>.` : 'Укажи время — посчитаю ₾/час.');
+}
+function saveAct(){
+  const f = flowById(AC.fid);
+  const rec = {id: AC._id || uid(), name: $('#acN').value.trim(), price: r2(num($('#acP').value)), min: Math.round(num($('#acM').value)), mat: r2(num($('#acT').value))};
+  if (!rec.name){ toast('Введи название'); return; }
+  if (AC._id) f.acts = f.acts.map(x => x.id === AC._id ? rec : x); else f.acts.push(rec);
+  save(); closeModal(); render();
+}
+function delAct(){
+  const f = flowById(AC.fid), id = AC._id;
+  confirmModal('Удалить работу?', 'Уже проведённые записи останутся в журнале.', 'Удалить', () => { f.acts = f.acts.filter(x => x.id !== id); save(); render(); });
+}
+
+/* ---------- окно: время ---------- */
+function openHoursModal(fid){
+  const f = flowById(fid);
+  window._ok = () => {
+    const min = Math.round(num($('#hH').value) * 60 + num($('#hM').value));
+    if (!(min > 0)){ toast('Укажи время'); return; }
+    state.hours.push({id: uid(), date: $('#hD').value || today(), flowId: fid, min, note: $('#hN').value.trim()});
+    save(); closeModal(); render(); toast('Время записано');
+  };
+  showModal(`<h2>Время · ${esc(f.name)}</h2><div class="hint">Время, которое не попало в работы: закупка, обучение, разработка, разбор сделок.</div>
+    <div class="grid2"><label><div class="fl">Часы</div><input class="inp" id="hH" inputmode="decimal" placeholder="0" aria-label="Часы"></label>
+    <label><div class="fl">Минуты</div><input class="inp" id="hM" inputmode="numeric" placeholder="0" aria-label="Минуты"></label></div>
+    <div class="grid2"><label><div class="fl">Дата</div><input class="inp" id="hD" type="date" value="${today()}" max="${today()}" aria-label="Дата"></label>
+    <label><div class="fl">Заметка</div><input class="inp" id="hN" placeholder="необязательно" aria-label="Заметка"></label></div>
+    <div class="btns"><button class="btn ghost" onclick="closeModal()">Отмена</button><button class="btn" onclick="_ok()">Сохранить</button></div>`);
+  setTimeout(() => $('#hH') && $('#hH').focus(), 80);
+}
+
+/* ---------- окно: портфель ---------- */
+function openPfModal(fid, kind){
+  const f = flowById(fid), c = f.cur || 'USD';
+  const T = {pnl: ['Результат', 'Прибыль или убыток по закрытым сделкам. Убыток — со знаком минус.'], dep: ['Внёс', 'Пополнение счёта на бирже.'], wd: ['Вывел', 'Вывод с биржи.']}[kind];
+  window._ok = () => {
+    const v = num($('#pA').value);
+    if (!v || (kind !== 'pnl' && v < 0)){ toast('Введи сумму'); return; }
+    state.pf.push({id: uid(), date: $('#pD').value || today(), flowId: fid, kind, amount: r2(v), note: $('#pN').value.trim()});
+    save(); closeModal(); render(); toast('Записано');
+  };
+  showModal(`<h2>${T[0]} · ${esc(f.name)}</h2><div class="hint">${T[1]}</div>
+    <div class="row"><input class="inp big grow" id="pA" inputmode="${kind === 'pnl' ? 'text' : 'decimal'}" placeholder="0" aria-label="Сумма"><b style="font-size:22px">${CUR[c]}</b></div>
+    <div class="grid2"><label><div class="fl">Дата</div><input class="inp" id="pD" type="date" value="${today()}" max="${today()}" aria-label="Дата"></label>
+    <label><div class="fl">Заметка</div><input class="inp" id="pN" placeholder="необязательно" aria-label="Заметка"></label></div>
+    <div class="btns"><button class="btn ghost" onclick="closeModal()">Отмена</button><button class="btn" onclick="_ok()">Сохранить</button></div>`);
+  setTimeout(() => $('#pA') && $('#pA').focus(), 80);
+}
+
+/* ---------- резервная копия ---------- */
+function hasNative(){ try { return typeof AndroidBridge !== 'undefined' && AndroidBridge.hasNativeBackup && AndroidBridge.hasNativeBackup(); } catch(e){ return false; } }
+function backupName(){ const d = today(); return 'flow-backup-' + d + '.json'; }
+function buildBackup(){ const data = JSON.parse(JSON.stringify(state)); delete data.draft; return {_fflow_backup: true, version: BACKUP_VERSION, exportedAt: new Date().toISOString(), data}; }
+function openBackupTarget(){
+  showModal(`<h2>Куда сохранить копию</h2><div class="hint">Лучше отправить в облако или мессенджер — тогда копия переживёт поломку телефона.</div>
+    <button class="btn" onclick="closeModal();AndroidBridge.shareBackup(JSON.stringify(buildBackup()),backupName())">Отправить (Диск, Telegram, почта)</button>
+    <div style="height:8px"></div>
+    <button class="btn ghost" onclick="closeModal();AndroidBridge.saveToDownloads(JSON.stringify(buildBackup()),backupName())">В папку «Загрузки»</button>`);
+}
+function markBackup(){ state.lastBackup = today(); save(); const i = $('#bkInfo'); if (i) i.textContent = 'Последняя копия: ' + dHuman(state.lastBackup); }
+window.onNativeBackupResult = function(action, status, msg){
+  if (status === 'ok'){ markBackup(); toast(action === 'save' ? 'Копия в «Загрузках»' : 'Выбери, куда отправить'); }
+  else toast('Не удалось сохранить: ' + (msg || 'ошибка'));
+};
+function downloadBackup(){
+  const blob = new Blob([JSON.stringify(buildBackup(), null, 1)], {type: 'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = backupName();
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  markBackup(); toast('Копия скачана');
+}
+function b64ToText(b64){ const bin = atob(b64), bytes = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i); return new TextDecoder('utf-8').decode(bytes); }
+window.onNativeImportResult = function(status, msg, b64){
+  if (status === 'cancel') return;
+  if (status !== 'ok'){ toast('Не удалось открыть файл: ' + (msg || '')); return; }
+  try { askRestore(b64ToText(b64)); } catch(e){ toast('Файл повреждён'); }
+};
+$('#fileIn').addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0]; if (!f) return;
+  const r = new FileReader(); r.onload = () => askRestore(String(r.result)); r.readAsText(f); e.target.value = '';
+});
+function askRestore(text){
+  let b; try { b = JSON.parse(text); } catch(e){ toast('Это не файл копии'); return; }
+  if (!b || !b._fflow_backup || !b.data || !Array.isArray(b.data.flows)){ toast('Это не копия «Финансового потока»'); return; }
+  const d = b.data, n = (d.works || []).length + (d.ops || []).length + (d.hours || []).length + (d.pf || []).length;
+  confirmModal('Восстановить копию?', `Копия от ${b.exportedAt ? dHuman(b.exportedAt.slice(0, 10)) : '?'}: потоков ${d.flows.length}, записей ${n}. Текущие данные будут заменены.`, 'Заменить', () => {
+    state = d; normalize(); state.draft = null; save(); go('overview'); toast('Копия восстановлена');
+  });
+}
+
+/* ---------- старт ---------- */
+load();
+render();
+</script>
+</body>
+</html>
